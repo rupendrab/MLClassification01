@@ -1,0 +1,140 @@
+nohup: ignoring input
+
+R version 3.2.2 (2015-08-14) -- "Fire Safety"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-redhat-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> setwd("/data1/RPred/")
+> repoDir = "/data1/R-repo"
+> if ( ! any(.libPaths() == repoDir) ) {
++     .libPaths( c( .libPaths(), "/data1/R-repo/") )
++ }
+> 
+> library(caret)
+Loading required package: lattice
+Loading required package: ggplot2
+> library(doMC)
+Loading required package: foreach
+Loading required package: iterators
+Loading required package: parallel
+> registerDoMC(cores = 8)
+> 
+> load("pml_base.RDA")
+> load("pca_data.RDA")
+> 
+> fitControl <- trainControl(method = "repeatedcv",
++                            number = 10,
++                            repeats = 5,
++                            ## Estimate class probabilities
++                            classProbs = TRUE)
+> 
+> gbmGrid <-  expand.grid(interaction.depth = c(1, 5, 9),
++                         n.trees = (1:30)*50,
++                         shrinkage = 0.1,
++                         n.minobsinnode = 20)
+> 
+> system.time({
++         modelFit_gbm_simple <- train(x = training[,predictionCols], 
++                                      y = training$classe,
++                                      method = "gbm",
++                                      verbose = FALSE,
++                                      trControl = fitControl)
++ })
+Loading required package: gbm
+Loading required package: survival
+
+Attaching package: ‘survival’
+
+The following object is masked from ‘package:caret’:
+
+    cluster
+
+Loading required package: splines
+Loaded gbm 2.1.1
+Loading required package: plyr
+    user   system  elapsed 
+3516.077    7.560  632.057 
+> 
+> print(confusionMatrix(training$classe, predict(modelFit_gbm_simple, newdata=training[,predictionCols])))
+Confusion Matrix and Statistics
+
+          Reference
+Prediction    A    B    C    D    E
+         A 3904    2    0    0    0
+         B   12 2629   15    2    0
+         C    0   11 2382    2    1
+         D    0    2   13 2237    0
+         E    0    5    4   10 2506
+
+Overall Statistics
+                                          
+               Accuracy : 0.9942          
+                 95% CI : (0.9928, 0.9954)
+    No Information Rate : 0.2851          
+    P-Value [Acc > NIR] : < 2.2e-16       
+                                          
+                  Kappa : 0.9927          
+ Mcnemar's Test P-Value : NA              
+
+Statistics by Class:
+
+                     Class: A Class: B Class: C Class: D Class: E
+Sensitivity            0.9969   0.9924   0.9867   0.9938   0.9996
+Specificity            0.9998   0.9974   0.9988   0.9987   0.9983
+Pos Pred Value         0.9995   0.9891   0.9942   0.9933   0.9925
+Neg Pred Value         0.9988   0.9982   0.9972   0.9988   0.9999
+Prevalence             0.2851   0.1928   0.1757   0.1639   0.1825
+Detection Rate         0.2842   0.1914   0.1734   0.1628   0.1824
+Detection Prevalence   0.2843   0.1935   0.1744   0.1639   0.1838
+Balanced Accuracy      0.9984   0.9949   0.9928   0.9962   0.9990
+> 
+> print(confusionMatrix(testing$classe, predict(modelFit_gbm_simple, newdata=testing[,predictionCols])))
+Confusion Matrix and Statistics
+
+          Reference
+Prediction    A    B    C    D    E
+         A 1672    2    0    0    0
+         B    3 1112   21    3    0
+         C    0    6 1019    1    0
+         D    0    0   10  954    0
+         E    0    3    0    7 1072
+
+Overall Statistics
+                                          
+               Accuracy : 0.9905          
+                 95% CI : (0.9877, 0.9928)
+    No Information Rate : 0.2846          
+    P-Value [Acc > NIR] : < 2.2e-16       
+                                          
+                  Kappa : 0.988           
+ Mcnemar's Test P-Value : NA              
+
+Statistics by Class:
+
+                     Class: A Class: B Class: C Class: D Class: E
+Sensitivity            0.9982   0.9902   0.9705   0.9886   1.0000
+Specificity            0.9995   0.9943   0.9986   0.9980   0.9979
+Pos Pred Value         0.9988   0.9763   0.9932   0.9896   0.9908
+Neg Pred Value         0.9993   0.9977   0.9936   0.9978   1.0000
+Prevalence             0.2846   0.1908   0.1784   0.1640   0.1822
+Detection Rate         0.2841   0.1890   0.1732   0.1621   0.1822
+Detection Prevalence   0.2845   0.1935   0.1743   0.1638   0.1839
+Balanced Accuracy      0.9989   0.9923   0.9845   0.9933   0.9990
+> 
+> save(modelFit_gbm_simple, file = "modelFit_gbm_simple.RDA", compress="gzip")
+> 
+> 

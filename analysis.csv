@@ -1,0 +1,11 @@
+Model,Execution_Time_Sec,Accuracy_Testing,Out_of_Sample_Error_Rate,Compressed_Model_Size_MB
+rpart,8,0.57,0.43,17
+Ranfom Forest (All Predictors),773,0.9973,0.0027,84
+Random Forest (80% PCA),648,0.9662,0.0338,52
+Random Forest (90% PCA),665,0.9749,0.0251,56
+Random Forest (95% PCA),680,0.9781,0.0219,60
+Linear Discriminant Analysis,5,0.7183,0.2817,1.9
+Naive Bayes,607,0.7633,0.2367,5.1
+"GBM (repeatedcv, folds=10, repeats=10)",632,0.9905,0.0095,6.6
+"GBM (repeatedcv, folds=5, repeats=1)",95,0.9866,0.0134,5.5
+Bag with Ctree,26,0.9689,0.0311,214

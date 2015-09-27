@@ -1,0 +1,115 @@
+
+R version 3.2.2 (2015-08-14) -- "Fire Safety"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-redhat-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> setwd("/data1/RPred/")
+> repoDir = "/data1/R-repo"
+> if ( ! any(.libPaths() == repoDir) ) {
++     .libPaths( c( .libPaths(), "/data1/R-repo/") )
++ }
+> 
+> library(caret)
+Loading required package: lattice
+Loading required package: ggplot2
+> library(doMC)
+Loading required package: foreach
+Loading required package: iterators
+Loading required package: parallel
+> registerDoMC(cores = 8)
+> 
+> load("pml_base.RDA")
+> load("pca_data.RDA")
+> 
+> system.time({
++         modelFit_rpart <- train(x = training[,predictionCols], 
++                               y = training$classe,
++                               method="rpart")
++ })
+Loading required package: rpart
+   user  system elapsed 
+ 19.467   1.261   8.102 
+> 
+> print(confusionMatrix(training$classe, predict(modelFit_rpart, newdata=training[,predictionCols])))
+Confusion Matrix and Statistics
+
+          Reference
+Prediction    A    B    C    D    E
+         A 3446   65  384    0   11
+         B  651  908 1099    0    0
+         C  372   79 1945    0    0
+         D  379  397 1385    0   91
+         E   87  200  682    0 1556
+
+Overall Statistics
+                                          
+               Accuracy : 0.5718          
+                 95% CI : (0.5635, 0.5801)
+    No Information Rate : 0.4             
+    P-Value [Acc > NIR] : < 2.2e-16       
+                                          
+                  Kappa : 0.4529          
+ Mcnemar's Test P-Value : < 2.2e-16       
+
+Statistics by Class:
+
+                     Class: A Class: B Class: C Class: D Class: E
+Sensitivity            0.6983   0.5506   0.3540       NA   0.9385
+Specificity            0.9477   0.8552   0.9453   0.8361   0.9198
+Pos Pred Value         0.8822   0.3416   0.8118       NA   0.6162
+Neg Pred Value         0.8485   0.9331   0.6870       NA   0.9909
+Prevalence             0.3592   0.1200   0.4000   0.0000   0.1207
+Detection Rate         0.2509   0.0661   0.1416   0.0000   0.1133
+Detection Prevalence   0.2843   0.1935   0.1744   0.1639   0.1838
+Balanced Accuracy      0.8230   0.7029   0.6496       NA   0.9291
+> 
+> print(confusionMatrix(testing$classe, predict(modelFit_rpart, newdata=testing[,predictionCols])))
+Confusion Matrix and Statistics
+
+          Reference
+Prediction    A    B    C    D    E
+         A 1472   25  174    0    3
+         B  277  388  474    0    0
+         C  149   30  847    0    0
+         D  151  181  577    0   55
+         E   49   79  306    0  648
+
+Overall Statistics
+                                          
+               Accuracy : 0.5701          
+                 95% CI : (0.5573, 0.5828)
+    No Information Rate : 0.4041          
+    P-Value [Acc > NIR] : < 2.2e-16       
+                                          
+                  Kappa : 0.4509          
+ Mcnemar's Test P-Value : < 2.2e-16       
+
+Statistics by Class:
+
+                     Class: A Class: B Class: C Class: D Class: E
+Sensitivity            0.7016  0.55192   0.3562       NA   0.9178
+Specificity            0.9467  0.85508   0.9490   0.8362   0.9162
+Pos Pred Value         0.8793  0.34065   0.8255       NA   0.5989
+Neg Pred Value         0.8513  0.93363   0.6849       NA   0.9879
+Prevalence             0.3565  0.11946   0.4041   0.0000   0.1200
+Detection Rate         0.2501  0.06593   0.1439   0.0000   0.1101
+Detection Prevalence   0.2845  0.19354   0.1743   0.1638   0.1839
+Balanced Accuracy      0.8241  0.70350   0.6526       NA   0.9170
+> 
+> save(modelFit_rpart, file = "modelFit_rpart.RDA", compress="gzip")
+> 
+> 

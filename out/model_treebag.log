@@ -1,0 +1,151 @@
+
+R version 3.2.2 (2015-08-14) -- "Fire Safety"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-redhat-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> setwd("/data1/RPred/")
+> repoDir = "/data1/R-repo"
+> if ( ! any(.libPaths() == repoDir) ) {
++     .libPaths( c( .libPaths(), "/data1/R-repo/") )
++ }
+> 
+> library(caret)
+Loading required package: lattice
+Loading required package: ggplot2
+> library(doMC)
+Loading required package: foreach
+Loading required package: iterators
+Loading required package: parallel
+> registerDoMC(cores = 8)
+> 
+> load("pml_base.RDA")
+> load("pca_data.RDA")
+> 
+> system.time({
++         modelFit_treebag <- bag(training[,predictionCols], 
++                                 training$classe,
++                                 B = 10,
++                                 bagControl = bagControl(
++                                     fit = ctreeBag$fit,
++                                     predict = ctreeBag$pred,
++                                     aggregate = ctreeBag$aggregate
++                                 ))
++ })
+   user  system elapsed 
+108.990   9.161  26.218 
+> 
+> print(confusionMatrix(training$classe, predict(modelFit_treebag, newdata=training[,predictionCols])))
+Confusion Matrix and Statistics
+
+          Reference
+Prediction    A    B    C    D    E
+         A 3886   11    0    3    6
+         B   22 2607   22    3    4
+         C    2   28 2360    6    0
+         D    2    8   54 2184    4
+         E    0    7    1   13 2504
+
+Overall Statistics
+                                          
+               Accuracy : 0.9857          
+                 95% CI : (0.9836, 0.9876)
+    No Information Rate : 0.2848          
+    P-Value [Acc > NIR] : < 2.2e-16       
+                                          
+                  Kappa : 0.982           
+ Mcnemar's Test P-Value : 3.882e-09       
+
+Statistics by Class:
+
+                     Class: A Class: B Class: C Class: D Class: E
+Sensitivity            0.9934   0.9797   0.9684   0.9887   0.9944
+Specificity            0.9980   0.9954   0.9968   0.9941   0.9981
+Pos Pred Value         0.9949   0.9808   0.9850   0.9698   0.9917
+Neg Pred Value         0.9974   0.9951   0.9932   0.9978   0.9988
+Prevalence             0.2848   0.1937   0.1774   0.1608   0.1833
+Detection Rate         0.2829   0.1898   0.1718   0.1590   0.1823
+Detection Prevalence   0.2843   0.1935   0.1744   0.1639   0.1838
+Balanced Accuracy      0.9957   0.9876   0.9826   0.9914   0.9963
+> 
+> print(confusionMatrix(testing$classe, predict(modelFit_treebag, newdata=testing[,predictionCols])))
+Confusion Matrix and Statistics
+
+          Reference
+Prediction    A    B    C    D    E
+         A 1649   15    1    5    4
+         B   23 1091   19    1    5
+         C    1   35  984    5    1
+         D    5    7   41  909    2
+         E    3    3    3    4 1069
+
+Overall Statistics
+                                          
+               Accuracy : 0.9689          
+                 95% CI : (0.9641, 0.9732)
+    No Information Rate : 0.2856          
+    P-Value [Acc > NIR] : < 2.2e-16       
+                                          
+                  Kappa : 0.9607          
+ Mcnemar's Test P-Value : 9.552e-06       
+
+Statistics by Class:
+
+                     Class: A Class: B Class: C Class: D Class: E
+Sensitivity            0.9810   0.9479   0.9389   0.9838   0.9889
+Specificity            0.9941   0.9899   0.9913   0.9889   0.9973
+Pos Pred Value         0.9851   0.9579   0.9591   0.9429   0.9880
+Neg Pred Value         0.9924   0.9874   0.9868   0.9970   0.9975
+Prevalence             0.2856   0.1956   0.1781   0.1570   0.1837
+Detection Rate         0.2802   0.1854   0.1672   0.1545   0.1816
+Detection Prevalence   0.2845   0.1935   0.1743   0.1638   0.1839
+Balanced Accuracy      0.9875   0.9689   0.9651   0.9863   0.9931
+> 
+> save(modelFit_treebag, file = "modelFit_treebag.RDA", compress="gzip")
+> 
+> ## Need to make sure all columns are the same class before applying prediction
+> finalData <- pml_test
+> for (i in 1:length(predictionCols)) {
++     c1 <- class(training[,predictionCols[i]])
++     c2 <- class(finalData[,predictionCols[i]])
++     if (c1 != c2) {
++         print(c(predictionCols[i], c1, c2))
++         fn1 <- get(paste("as.", c1, sep=""), mode="function")
++         finalData[,predictionCols[i]] <- fn1(finalData[,predictionCols[i]])
++     }
++ }
+[1] "magnet_forearm_z" "numeric"          "integer"         
+[1] "magnet_forearm_y" "numeric"          "integer"         
+[1] "magnet_dumbbell_z" "numeric"           "integer"          
+> 
+> predict(modelFit_treebag, newdata=finalData[,predictionCols])
+ [1] B A B A A E D B A A B C B A E E A B B B
+Levels: A B C D E
+> load("modelFit_rf_full.RDA")
+> x1 <- predict(modelFit_treebag, newdata=finalData[,predictionCols])
+> x2 <- predict(modelFit_rf_full, newdata=finalData[,predictionCols])
+Loading required package: randomForest
+randomForest 4.6-10
+Type rfNews() to see new features/changes/bug fixes.
+> any(x1 != x2)
+[1] FALSE
+> 
+> cftest_treebag <- confusionMatrix(testing$classe, predict(modelFit_treebag, newdata=testing[,predictionCols]))
+> cftest_treebag$overall[1]
+Accuracy 
+0.968904 
+> 
+> 

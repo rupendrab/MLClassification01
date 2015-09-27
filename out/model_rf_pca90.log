@@ -1,0 +1,122 @@
+
+R version 3.2.2 (2015-08-14) -- "Fire Safety"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-redhat-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> setwd("/data1/RPred/")
+> repoDir = "/data1/R-repo"
+> if ( ! any(.libPaths() == repoDir) ) {
++     .libPaths( c( .libPaths(), "/data1/R-repo/") )
++ }
+> 
+> library(caret)
+Loading required package: lattice
+Loading required package: ggplot2
+> library(doMC)
+Loading required package: foreach
+Loading required package: iterators
+Loading required package: parallel
+> registerDoMC(cores = 8)
+> 
+> load("pml_base.RDA")
+> load("pca_data.RDA")
+> 
+> pca_train_90 <- predict(preProc_90, training[,predictionCols])
+> pca_test_90 <- predict(preProc_90, testing[,predictionCols])
+> 
+> system.time({
++         modelFit_rf_pca90 <- train(x = pca_train_90, 
++                                   y = training$classe,
++                                   method="rf", 
++                                   trControl=trainControl(method="cv",number=5, allowParallel = TRUE), 
++                                   prox=TRUE)
++ })
+Loading required package: randomForest
+randomForest 4.6-10
+Type rfNews() to see new features/changes/bug fixes.
+    user   system  elapsed 
+2983.412   15.981  665.342 
+> 
+> print(confusionMatrix(training$classe, predict(modelFit_rf_pca90, newdata=pca_train_90)))
+Confusion Matrix and Statistics
+
+          Reference
+Prediction    A    B    C    D    E
+         A 3906    0    0    0    0
+         B    0 2658    0    0    0
+         C    0    0 2396    0    0
+         D    0    0    0 2252    0
+         E    0    0    0    0 2525
+
+Overall Statistics
+                                     
+               Accuracy : 1          
+                 95% CI : (0.9997, 1)
+    No Information Rate : 0.2843     
+    P-Value [Acc > NIR] : < 2.2e-16  
+                                     
+                  Kappa : 1          
+ Mcnemar's Test P-Value : NA         
+
+Statistics by Class:
+
+                     Class: A Class: B Class: C Class: D Class: E
+Sensitivity            1.0000   1.0000   1.0000   1.0000   1.0000
+Specificity            1.0000   1.0000   1.0000   1.0000   1.0000
+Pos Pred Value         1.0000   1.0000   1.0000   1.0000   1.0000
+Neg Pred Value         1.0000   1.0000   1.0000   1.0000   1.0000
+Prevalence             0.2843   0.1935   0.1744   0.1639   0.1838
+Detection Rate         0.2843   0.1935   0.1744   0.1639   0.1838
+Detection Prevalence   0.2843   0.1935   0.1744   0.1639   0.1838
+Balanced Accuracy      1.0000   1.0000   1.0000   1.0000   1.0000
+> 
+> print(confusionMatrix(testing$classe, predict(modelFit_rf_pca90, newdata=pca_test_90)))
+Confusion Matrix and Statistics
+
+          Reference
+Prediction    A    B    C    D    E
+         A 1665    2    6    1    0
+         B   17 1095   25    1    1
+         C    1   18  990   16    1
+         D    4    1   40  919    0
+         E    0   10    0    4 1068
+
+Overall Statistics
+                                          
+               Accuracy : 0.9749          
+                 95% CI : (0.9705, 0.9787)
+    No Information Rate : 0.2867          
+    P-Value [Acc > NIR] : < 2.2e-16       
+                                          
+                  Kappa : 0.9682          
+ Mcnemar's Test P-Value : NA              
+
+Statistics by Class:
+
+                     Class: A Class: B Class: C Class: D Class: E
+Sensitivity            0.9870   0.9725   0.9331   0.9766   0.9981
+Specificity            0.9979   0.9908   0.9925   0.9909   0.9971
+Pos Pred Value         0.9946   0.9614   0.9649   0.9533   0.9871
+Neg Pred Value         0.9948   0.9935   0.9854   0.9955   0.9996
+Prevalence             0.2867   0.1913   0.1803   0.1599   0.1818
+Detection Rate         0.2829   0.1861   0.1682   0.1562   0.1815
+Detection Prevalence   0.2845   0.1935   0.1743   0.1638   0.1839
+Balanced Accuracy      0.9924   0.9816   0.9628   0.9838   0.9976
+> 
+> save(modelFit_rf_pca90, file = "modelFit_rf_pca90.RDA", compress="gzip")
+> 
+> 
