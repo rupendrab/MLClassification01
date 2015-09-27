@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
-<title>Executive Summary</title>
+<title>Predict Manner of Exercise from Sensor Data</title>
 
 <script type="text/javascript">
 window.onload = function() {
@@ -201,6 +201,8 @@ hr {
 </head>
 
 <body>
+<h1>Predict Manner of Exercise from Sensor Data</h1>
+
 <h2>Executive Summary</h2>
 
 <p>In this study, we have attempted to build a machine learning model to predict exercise effectiveness type from data recorded by body movement sensors. Our data source is the human activity recognition dataset (Source: <a href="http://groupware.les.inf.puc-rio.br/har">Human Activity Recognition</a>). From the available pre-classified data, we have trained machine learning models to predict the manner of exercise from sensor data. We have performed exploratory analysis to do basic clean-up and selection of appropriate prediction variables and have then evaluated several classification model algorithms using cross validation techniques. Finally, we have presented our observation on the relative effectiveness of the models.</p>
@@ -260,7 +262,7 @@ classe_pcts
 
 <p>The details of this process is in appendix 1.1. We come up with a set of 53 prediction variables and we store them as predictionCols for usage in models.</p>
 
-<p>While this is a substantial reduction from the original set of 159 variables, we are still interested to see if we can get good prediction from a smaller set. Since it is not easy to arbitrarily choose such variables without substantial exploratory analysis or domain knowledge, we have chosen the Principal Component Analysis (PCA) method to create a smaller set of variables that account for a reasonable percentage of the overall variation. Specifically, we have created 3 PCA variable sets that explain 80%, 90% and 95% of the variability respectively. The corresponding number of variables are 13, 19 and 25 respectively. The PCA selection is in Appendix 1.2.</p>
+<p>While this is a substantial reduction from the original set of 159 variables, we are still interested to see if we can get good prediction from a smaller set. Since it is not easy to arbitrarily choose such variables without substantial exploratory analysis or domain knowledge, we have chosen the Principal Component Analysis (PCA) method to create a smaller set of variables that account for a reasonable percentage of the overall variation. Specifically, we have created 3 PCA variable sets that explain 80%, 90% and 95% of the variability respectively. The corresponding number of variables are 13, 19 and 25 respectively. The PCA selection code is in Appendix 1.2.</p>
 
 <h2>Model Selection</h2>
 

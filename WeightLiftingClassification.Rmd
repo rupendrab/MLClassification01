@@ -1,9 +1,4 @@
----
-title: 'Machine Learning Assignment: Predicting Manner of Exercise from Sensor Data'
-author: "Rupendra Bandyopadhyay"
-date: "September 25, 2015"
-output: html_document
----
+# Predict Manner of Exercise from Sensor Data
 
 ## Executive Summary
 
@@ -75,7 +70,7 @@ We have approached the method of selection of prediction variables in three ways
 
 The details of this process is in appendix 1.1. We come up with a set of `r length(predictionCols)` prediction variables and we store them as predictionCols for usage in models.
 
-While this is a substantial reduction from the original set of `r dim(training)[2] -1` variables, we are still interested to see if we can get good prediction from a smaller set. Since it is not easy to arbitrarily choose such variables without substantial exploratory analysis or domain knowledge, we have chosen the Principal Component Analysis (PCA) method to create a smaller set of variables that account for a reasonable percentage of the overall variation. Specifically, we have created 3 PCA variable sets that explain 80%, 90% and 95% of the variability respectively. The corresponding number of variables are `r preProc_80$numComp`, `r preProc_90$numComp` and `r preProc_95$numComp` respectively. The PCA selection is in Appendix 1.2.
+While this is a substantial reduction from the original set of `r dim(training)[2] -1` variables, we are still interested to see if we can get good prediction from a smaller set. Since it is not easy to arbitrarily choose such variables without substantial exploratory analysis or domain knowledge, we have chosen the Principal Component Analysis (PCA) method to create a smaller set of variables that account for a reasonable percentage of the overall variation. Specifically, we have created 3 PCA variable sets that explain 80%, 90% and 95% of the variability respectively. The corresponding number of variables are `r preProc_80$numComp`, `r preProc_90$numComp` and `r preProc_95$numComp` respectively. The PCA selection code is in Appendix 1.2.
 
 ## Model Selection
 
