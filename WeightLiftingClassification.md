@@ -70,7 +70,9 @@ While this is a substantial reduction from the original set of 159 variables, we
 
 ## Model Selection
 
-We have applied a total of ten different classification models were to the training data set and calculated their efficiencies on the training data set. The results were cross validated against the testing data set so we can say with some measure of confidence that the prediction accuracy will hold good. In general, we assume that the accuracy observed on the testing set is our expectation of the accuracy of the model in predicting the "classe" variable. We have also tried to evaluate the models based on how long they take to build. This is important because in real world situations, the data would often be much larger than this data set (about 1000 times or more), so a slow model might simply be unusable. In order to compare models, we have used the same execution environment [n1-standard-8 (8 vCPUs, 30 GB memory) on Google Compute Cloud, CentOS 6.7 OS and R version 3.2.2]. Multicore processing was enabled using the doMC library and all available 8 cores were used.
+We have applied a total of ten different classification models to the training data set and calculated their efficiencies on the training data set. The results were cross validated against the testing data set so we can say with some measure of confidence that the prediction accuracy will hold good. In general, we assume that the accuracy observed on the testing set is our expectation of the accuracy of the model in predicting the "classe" variable. The expected out of sample error rate is the error rate observed on the test set.   
+
+We have also tried to evaluate the models based on how long they take to build. This is important because in real world situations, the data would often be much larger than this data set (about 1000 times or more), so a slow model might simply be unusable. In order to compare models, we have used the same execution environment [n1-standard-8 (8 vCPUs, 30 GB memory) on Google Compute Cloud, CentOS 6.7 OS and R version 3.2.2]. Multicore processing was enabled using the doMC library and all available 8 cores were used.
 
 #### Model 1 (RPart)
 
@@ -172,13 +174,13 @@ Because the model building was very slow, we are doubtful about handling this mo
 
 #### Model 3, 4, 5 (Random Forest with PCA dependent variables (80%, 85% and 90%))
 
-The appropriate model building codes are in Appendix 1.3. We observe that the model building process becomes faster but does not improve substantially. The case with 80% PCA builds in 11 minutes, but accuracy in predicting the testing data set falls to 96.62%. As we increase the PCA percentage, accuracy and time to build increases. We can conclude that we do not gain much by using PCA in thie case.  
+The appropriate model building codes are in Appendix 1.3. We observe that the model building process becomes faster but does not improve substantially. The case with 80% PCA builds in 11 minutes, but accuracy in predicting the testing data set falls to 96.62%. As we increase the PCA percentage, accuracy and time to build increases. We can conclude that we do not gain much by using PCA in this case.  
 
-So, while "Random Forest" performed really well in its power of prediction, it was a very slow model building process even with a training data set of the size of about 14000 records. We cannot be confident that we can use this model if our data set has tens or hunderds of mullons of records as is so often the case with big data. With that in mind, we explored a few other models as well.
+So, while "Random Forest" performed really well in its power of prediction, it was a very slow model building process even with a training data set of the size of about 14000 records. We cannot be confident that we can use this model if our data set has tens or hunderds of millions of records as is so often the case with big data. With that in mind, we explored a few other models as well.
 
 #### Model 6 (Linear Discriminant Analysis or LDA)
 
-Under certain circumstances, using a probablistic model like LDA or Naive Bayes work well as well. The LDA method (code in Appendix 1.4)
+Under certain circumstances, using a probablistic model like LDA or Naive Bayes work well as well. The LDA method (code in Appendix 1.4) is our next chosen one.
 
 
 
@@ -194,7 +196,7 @@ This was not a great success. The model building time was high (almost 10 monute
 
 #### Model 8 and 9 Gradient Boosting with Trees (GBM)
 
-The Gradient Boosting with trees methos was tried next. We used "repeatedcv" (Repeated Cross Validations) in with two different combinations for folds and repeats. The code is in Appendix 1.5.
+The Gradient Boosting with trees methos was tried next. We used "repeatedcv" (Repeated Cross Validations) in with two different combinations for folds and repeats. The code is in Appendix 1.6.
 
 
 
@@ -206,7 +208,7 @@ However, with 5 folds and 1 repeat, the model built very fast (about 1.5 minutes
 
 #### Model 10 Bagging with Tree Bag
 
-For our last model, with tried the bagging method using ctree available in in party package. The code is in Appendix 1.6.
+For our last model, with tried the bagging method using ctree available in in party package. The code is in Appendix 1.7.
 
 
 
@@ -320,7 +322,19 @@ print(confusionMatrix(training$classe, predict(modelFit_lda, newdata=training[,p
 print(confusionMatrix(testing$classe, predict(modelFit_lda, newdata=testing[,predictionCols])))
 ```
 
-### Appendix 1.5 GBM
+### Appendix 1.5 Navie Bayes
+
+
+```r
+modelFit_nb <- train(x = training[,predictionCols], 
+                     y = training$classe,
+                     method="nb")
+
+print(confusionMatrix(training$classe, predict(modelFit_nb, newdata=training[,predictionCols])))
+print(confusionMatrix(testing$classe, predict(modelFit_nb, newdata=testing[,predictionCols])))
+```
+
+### Appendix 1.6 GBM
 
 
 ```r
@@ -343,7 +357,7 @@ modelFit_gbm_simple <- model_gbm(10, 5)
 modelFit_gbm_simple2 <- model_gbm(5, 1)
 ```
 
-### Appendix 1.6 Bagging with ctree
+### Appendix 1.7 Bagging with ctree
 
 ```r
 modelFit_treebag <- bag(training[,predictionCols], 
