@@ -266,7 +266,9 @@ classe_pcts
 
 <h2>Model Selection</h2>
 
-<p>We have applied a total of ten different classification models were to the training data set and calculated their efficiencies on the training data set. The results were cross validated against the testing data set so we can say with some measure of confidence that the prediction accuracy will hold good. In general, we assume that the accuracy observed on the testing set is our expectation of the accuracy of the model in predicting the &ldquo;classe&rdquo; variable. We have also tried to evaluate the models based on how long they take to build. This is important because in real world situations, the data would often be much larger than this data set (about 1000 times or more), so a slow model might simply be unusable. In order to compare models, we have used the same execution environment [n1-standard-8 (8 vCPUs, 30 GB memory) on Google Compute Cloud, CentOS 6.7 OS and R version 3.2.2]. Multicore processing was enabled using the doMC library and all available 8 cores were used.</p>
+<p>We have applied a total of ten different classification models to the training data set and calculated their efficiencies on the training data set. The results were cross validated against the testing data set so we can say with some measure of confidence that the prediction accuracy will hold good. In general, we assume that the accuracy observed on the testing set is our expectation of the accuracy of the model in predicting the &ldquo;classe&rdquo; variable. The expected out of sample error rate is the error rate observed on the test set.   </p>
+
+<p>We have also tried to evaluate the models based on how long they take to build. This is important because in real world situations, the data would often be much larger than this data set (about 1000 times or more), so a slow model might simply be unusable. In order to compare models, we have used the same execution environment [n1-standard-8 (8 vCPUs, 30 GB memory) on Google Compute Cloud, CentOS 6.7 OS and R version 3.2.2]. Multicore processing was enabled using the doMC library and all available 8 cores were used.</p>
 
 <h4>Model 1 (RPart)</h4>
 
@@ -356,13 +358,13 @@ res
 
 <h4>Model 3, 4, 5 (Random Forest with PCA dependent variables (80%, 85% and 90%))</h4>
 
-<p>The appropriate model building codes are in Appendix 1.3. We observe that the model building process becomes faster but does not improve substantially. The case with 80% PCA builds in 11 minutes, but accuracy in predicting the testing data set falls to 96.62%. As we increase the PCA percentage, accuracy and time to build increases. We can conclude that we do not gain much by using PCA in thie case.  </p>
+<p>The appropriate model building codes are in Appendix 1.3. We observe that the model building process becomes faster but does not improve substantially. The case with 80% PCA builds in 11 minutes, but accuracy in predicting the testing data set falls to 96.62%. As we increase the PCA percentage, accuracy and time to build increases. We can conclude that we do not gain much by using PCA in this case.  </p>
 
-<p>So, while &ldquo;Random Forest&rdquo; performed really well in its power of prediction, it was a very slow model building process even with a training data set of the size of about 14000 records. We cannot be confident that we can use this model if our data set has tens or hunderds of mullons of records as is so often the case with big data. With that in mind, we explored a few other models as well.</p>
+<p>So, while &ldquo;Random Forest&rdquo; performed really well in its power of prediction, it was a very slow model building process even with a training data set of the size of about 14000 records. We cannot be confident that we can use this model if our data set has tens or hunderds of millions of records as is so often the case with big data. With that in mind, we explored a few other models as well.</p>
 
 <h4>Model 6 (Linear Discriminant Analysis or LDA)</h4>
 
-<p>Under certain circumstances, using a probablistic model like LDA or Naive Bayes work well as well. The LDA method (code in Appendix 1.4)</p>
+<p>Under certain circumstances, using a probablistic model like LDA or Naive Bayes work well as well. The LDA method (code in Appendix 1.4) is our next chosen one.</p>
 
 <p>The LDA method is very fast (took only 5 seconds to run), but the accuracy on the testing set is 71.51% is not very encouraging and the out of sample error rate is consequently high at 28.49%. This may not be acceptable in many real life situations.</p>
 
@@ -374,7 +376,7 @@ res
 
 <h4>Model 8 and 9 Gradient Boosting with Trees (GBM)</h4>
 
-<p>The Gradient Boosting with trees methos was tried next. We used &ldquo;repeatedcv&rdquo; (Repeated Cross Validations) in with two different combinations for folds and repeats. The code is in Appendix 1.5.</p>
+<p>The Gradient Boosting with trees methos was tried next. We used &ldquo;repeatedcv&rdquo; (Repeated Cross Validations) in with two different combinations for folds and repeats. The code is in Appendix 1.6.</p>
 
 <p>With 10 folds and 5 repeats, the model building process is slow (about 10.5 minutes) and the out of sample error is 0.95% which is good but not as good as Random Forest.</p>
 
@@ -382,7 +384,7 @@ res
 
 <h4>Model 10 Bagging with Tree Bag</h4>
 
-<p>For our last model, with tried the bagging method using ctree available in in party package. The code is in Appendix 1.6.</p>
+<p>For our last model, with tried the bagging method using ctree available in in party package. The code is in Appendix 1.7.</p>
 
 <p>This model is very good for both accuracy / out of sample error and time to build the model. The model built in jus 27 seconds and the out of sample error rate was 3.11%. So if an accuracy of 96.89% is acceptable, this is a very quick model compared to Random Forest.</p>
 
@@ -564,7 +566,17 @@ print(confusionMatrix(training$classe, predict(modelFit_lda, newdata=training[,p
 print(confusionMatrix(testing$classe, predict(modelFit_lda, newdata=testing[,predictionCols])))
 </code></pre>
 
-<h3>Appendix 1.5 GBM</h3>
+<h3>Appendix 1.5 Navie Bayes</h3>
+
+<pre><code class="r">modelFit_nb &lt;- train(x = training[,predictionCols], 
+                     y = training$classe,
+                     method=&quot;nb&quot;)
+
+print(confusionMatrix(training$classe, predict(modelFit_nb, newdata=training[,predictionCols])))
+print(confusionMatrix(testing$classe, predict(modelFit_nb, newdata=testing[,predictionCols])))
+</code></pre>
+
+<h3>Appendix 1.6 GBM</h3>
 
 <pre><code class="r">model_gbm &lt;- function(folds, repeats) {
         fitControl &lt;- trainControl(method = &quot;repeatedcv&quot;,
@@ -585,7 +597,7 @@ modelFit_gbm_simple &lt;- model_gbm(10, 5)
 modelFit_gbm_simple2 &lt;- model_gbm(5, 1)
 </code></pre>
 
-<h3>Appendix 1.6 Bagging with ctree</h3>
+<h3>Appendix 1.7 Bagging with ctree</h3>
 
 <pre><code class="r">modelFit_treebag &lt;- bag(training[,predictionCols], 
                         training$classe,
