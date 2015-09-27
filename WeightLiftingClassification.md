@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-In this study, we have attempted to build a machine learning model to predict exercise effectiveness type from data recorded by body movement sensors. Our data source is the human activity recognition dataset (Source: [Human Activity Recognition][1]). From the available pre-classified data, we have trained machine learning models to predict the manner of exercise from sensor data. We have performed exploratory analysis to do basic clean-up and selection of appropriate prediction variables and have then evaluated several classification model algorithms using cross validation techniques. Finally, we have presented our observation on the relative effectiveness of the models.
+In this study, we have attempted to build a machine learning model to predict exercise effectiveness type from data recorded by body movement sensors. Our data source is the human activity recognition dataset (Source: [Human Activity Recognition][1]). From the available pre-classified data recorded from sensors, we have trained machine learning models to predict the manner of exercise. We have performed exploratory analysis to do basic clean-up and selection of appropriate prediction variables and have then evaluated several classification model algorithms using cross validation techniques. Finally, we have presented our observation on the relative effectiveness of the models.
 
 ## Data Source
 
@@ -58,7 +58,7 @@ So, the distribution of the classes is fairly even. Class A corresponds to the a
 
 ## Selection of Prediction Variables
 
-We have approached the method of selection of prediction variables in three ways.  
+We have approached the method of selection of prediction variables in four ways.  
 1. Eliminate variables that we do not believe are appropriate for prediction. To this end, we have eliminated a variable that is just a sequence number, the name of the person performing the exercise and timestamp related variables.  
 2. Eliminate variables that have too many (over 90%) NA values. If some variables have a few NA values, we can impute them, but that was not the case here.  
 3. Eliminate variables that have little variation across the dataset. This is done with the "nearZeroVariable" method.  
@@ -170,7 +170,7 @@ res
 
 The calculation was slow (about 13 minutes) but the accuracy of the results look highly promising. Our accuracy in prediction of the testing data set is an amazing 99.73%. Out of sample error rate is 0.27%
 
-Because the model building was very slow, we are doubtful about handling this model if that training data set was 14 million records (or may be 140 million records) instead of the 14 thosand records we are handling here. So, we proceed to try the reduced variable scenarios we can create using our pre-performed PCA analysis.
+Because the model building was very slow, we are doubtful about the effectiveness this model if the training data set was 14 million records (or may be 140 million records) instead of the 14 thosand records we are handling here. So, we proceed to try the reduced variable scenarios we have created using our pre-performed PCA analysis.
 
 #### Model 3, 4, 5 (Random Forest with PCA dependent variables (80%, 85% and 90%))
 
@@ -192,7 +192,7 @@ Next, we tried the Naive Bayes classifier. Code is in Appendix 1.5.
 
 
 
-This was not a great success. The model building time was high (almost 10 monutes), and the accuracy on the testing set (75.6%) and out of sample error rate (24.4%) were not much of an improvement with LDA. Also, the prediction process itself seemed to be much slower than any of the other models. We would not choose this model as a winner in this scenario.
+This was not a great success. The model building time was high (almost 10 monutes), and the accuracy on the testing set (75.6%) and out of sample error rate (24.4%) were not much of an improvement over LDA. Also, the prediction process itself seemed to be much slower than any of the other models. We would not choose this model as a winner in this scenario.
 
 #### Model 8 and 9 Gradient Boosting with Trees (GBM)
 
@@ -212,11 +212,11 @@ For our last model, with tried the bagging method using ctree available in in pa
 
 
 
-This model is very good for both accuracy / out of sample error and time to build the model. The model built in jus 27 seconds and the out of sample error rate was 3.11%. So if an accuracy of 96.89% is acceptable, this is a very quick model compared to Random Forest.
+This model is very good for both accuracy / out of sample error and time to build the model. The model built in just 27 seconds and the out of sample error rate was 3.11%. So if an accuracy of 96.89% is acceptable, this is a very quick model compared to Random Forest.
 
 ## Final Thoughts
 
-We summarize our model selection with some factual comparisons between the models we tried. The table below shows our findings. We have used a somewhat arbitrary formula of [Out Of Sample Error Rate] * [Execution Time] to rank these, which can change according to individual preferences. But most important thing to note is that execution time to build the model might be critical to the success of the entire project and it must be looked into as well in addition to the prediction accuracy / error. We have also plotted our models based on these two variables.
+We summarize our model selection with some factual comparisons between the models we tried. The table below shows our findings. We have used a somewhat arbitrary formula of $[Out Of Sample Error Rate] * [Execution Time]^{0.8}$ to rank these, which can change according to individual preferences. But most important thing to note is that execution time to build the model might be critical to the success of the entire project and it must be looked into as well in addition to the prediction accuracy / error. We have also plotted our models based on these two variables.
 
 
 |Model                                  | Execution_Time_Sec| Accuracy_Testing| Out_of_Sample_Error_Rate| Compressed_Model_Size_MB| ranking|
